@@ -25,6 +25,35 @@ void setup() {
   Serial.println("\nConnected to WiFi!");
   Serial.println("IP Address: " + WiFi.localIP().toString());
 
+  server.on("/send", HTTP_GET, []() {
+    if (server.hasArg("message")) {
+      String message = server.arg("message");
+
+
+      Serial.println("Received message: " + message);
+      Serial.flush();
+      delay(50);
+
+
+    unsigned long startMillis = millis();
+    while (millis() - startMillis < 20000) {
+      if (Serial.available() > 0) {
+        break;
+      }
+    }
+    
+    if (Serial.available()) {
+        String responseFromLLM = Serial.readStringUntil('\n'); 
+        responseFromLLM.trim();
+        processLLMResponse(responseFromLLM);
+  
+    } else {
+        server.send(200, "text/plain", "No response from LLM.");
+    }
+
+        }
+      });
+
   server.begin();
   Serial.println("HTTP server started");
 }
