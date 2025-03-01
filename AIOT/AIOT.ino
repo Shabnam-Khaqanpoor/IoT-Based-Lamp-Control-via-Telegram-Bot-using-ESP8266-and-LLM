@@ -8,6 +8,41 @@ const char* wifi_password = ""; //put your own password
 ESP8266WebServer server(80); 
 
 const int ledPin = 2; 
+String lastMessage = "";
+
+void controlLED(int onTime, int offTime, int repeat) {
+  for(int i=0; i<repeat ;i++){
+    digitalWrite(ledPin, LOW);  
+    delay(onTime);           
+    digitalWrite(ledPin, HIGH); 
+    delay(offTime);           
+  }
+}
+
+void processLLMResponse(const String& command) {
+ 
+  if (command == "A") {
+    server.send(200, "text/plain", "The kitchen light turned on!");
+    controlLED(500, 100,5); 
+  } else if (command == "B") {
+    server.send(200, "text/plain", "The kitchen light turned off!");
+    controlLED(500, 100,10);
+  } else if (command == "C") {
+    server.send(200, "text/plain", "The room light turned on!");
+    controlLED(500, 100,15);
+  } else if (command == "D") {
+    server.send(200, "text/plain", "The room light turned off!");
+    controlLED(500, 100,20);
+  } else if (command == "E") {
+     server.send(200, "text/plain", "Both lights turned on!");
+    digitalWrite(ledPin, LOW); 
+  } else if (command == "F") {
+    server.send(200, "text/plain", "Both lights turned off!");
+    digitalWrite(ledPin, HIGH);
+  } else {
+    server.send(200, "text/plain", "Invalid!");
+  }
+}
 
 void setup() {
   Serial.begin(115200);  
