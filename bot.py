@@ -1,5 +1,7 @@
 from telegram.ext import ApplicationBuilder ,MessageHandler,ContextTypes, filters
 from telegram import Update
+import aiohttp
+from urllib.parse import quote
 
 
 ESP8266_IP = "" #put your own IP
@@ -7,7 +9,19 @@ ESP8266_PORT = 80
 AUTHORIZED_CHAT_IDS = [] #add IDs to this list
 
 async def send_to_esp8266_aiohttp(message: str) -> str:
-    pass
+    try:
+
+        encoded_message = quote(message)
+        url = f"http://{ESP8266_IP}:{ESP8266_PORT}/send?message={encoded_message}"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers={"User-Agent": "aiohttp-client"}) as response:
+                if response.status == 200:
+                    return await response.text()
+                else:
+                    return f"Error: Received status code {response.status} from ESP8266."
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_message = update.message.text
